@@ -7,93 +7,16 @@
     "default": {},
     "examples": [
         {
-            "name": "shimayoshiki/mini_bbs",
-            "authors": [
-                {
-                    "name": "Local Disk",
-                    "email": "yoshikishima0214m@gmail.com"
-                }
-            ],
-            "require": {}
+            "require": {
+                "php": "~7.0",
+                "ext-mbstring": "*"
+            }
         }
     ],
     "required": [
-        "name",
-        "authors",
         "require"
     ],
     "properties": {
-        "name": {
-            "$id": "#/properties/name",
-            "type": "string",
-            "title": "The name schema",
-            "description": "An explanation about the purpose of this instance.",
-            "default": "",
-            "examples": [
-                "shimayoshiki/mini_bbs"
-            ]
-        },
-        "authors": {
-            "$id": "#/properties/authors",
-            "type": "array",
-            "title": "The authors schema",
-            "description": "An explanation about the purpose of this instance.",
-            "default": [],
-            "examples": [
-                [
-                    {
-                        "name": "Local Disk",
-                        "email": "yoshikishima0214m@gmail.com"
-                    }
-                ]
-            ],
-            "additionalItems": true,
-            "items": {
-                "$id": "#/properties/authors/items",
-                "anyOf": [
-                    {
-                        "$id": "#/properties/authors/items/anyOf/0",
-                        "type": "object",
-                        "title": "The first anyOf schema",
-                        "description": "An explanation about the purpose of this instance.",
-                        "default": {},
-                        "examples": [
-                            {
-                                "name": "Local Disk",
-                                "email": "yoshikishima0214m@gmail.com"
-                            }
-                        ],
-                        "required": [
-                            "name",
-                            "email"
-                        ],
-                        "properties": {
-                            "name": {
-                                "$id": "#/properties/authors/items/anyOf/0/properties/name",
-                                "type": "string",
-                                "title": "The name schema",
-                                "description": "An explanation about the purpose of this instance.",
-                                "default": "",
-                                "examples": [
-                                    "Local Disk"
-                                ]
-                            },
-                            "email": {
-                                "$id": "#/properties/authors/items/anyOf/0/properties/email",
-                                "type": "string",
-                                "title": "The email schema",
-                                "description": "An explanation about the purpose of this instance.",
-                                "default": "",
-                                "examples": [
-                                    "yoshikishima0214m@gmail.com"
-                                ]
-                            }
-                        },
-                        "additionalProperties": true
-                    }
-                ]
-            }
-        },
         "require": {
             "$id": "#/properties/require",
             "type": "object",
@@ -101,9 +24,37 @@
             "description": "An explanation about the purpose of this instance.",
             "default": {},
             "examples": [
-                {}
+                {
+                    "php": "~7.0",
+                    "ext-mbstring": "*"
+                }
             ],
-            "required": [],
+            "required": [
+                "php",
+                "ext-mbstring"
+            ],
+            "properties": {
+                "php": {
+                    "$id": "#/properties/require/properties/php",
+                    "type": "string",
+                    "title": "The php schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": "",
+                    "examples": [
+                        "~7.0"
+                    ]
+                },
+                "ext-mbstring": {
+                    "$id": "#/properties/require/properties/ext-mbstring",
+                    "type": "string",
+                    "title": "The ext-mbstring schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": "",
+                    "examples": [
+                        "*"
+                    ]
+                }
+            },
             "additionalProperties": true
         }
     },
