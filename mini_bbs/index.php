@@ -1,8 +1,14 @@
 <?php
 session_start();
 require('dbconnect.php');
+
+// ログインが出来ている人ならば
+// ログインしてから1時間以内ならば
 if (isset($_SESSION['id']) && $_SESSION['time'] + 3600 > time()) {
+
+  // 何かアクションを起こすとその時間に現在時刻を入れる
   $_SESSION['time'] = time();
+
 
   $members = $db->prepare('SELECT * FROM members WHERE id=?');
   $members->execute(array($_SESSION['id']));
@@ -17,6 +23,8 @@ if (!empty($_POST)) {
     if (!isset($_REQUEST['res'])) {
       $_POST['reply_post_id'] = 0;
     }
+
+    // postsのデータベースの内容を引き出す
     $message = $db->prepare('INSERT INTO posts SET member_id=?, message=?, reply_message_id=?,  created=NOW()');
     $message->execute(array(
       $member['id'],
@@ -25,7 +33,9 @@ if (!empty($_POST)) {
 
     ));
 
-    // 情報を重複しないように
+
+    // 再読み込みした際にメッセージを重複させないように
+    // ポストで情報をデータベースに送った後自身のページをよぶことでポストが持っている情報を消すことができる
     header('Location: index.php');
     exit();
   }
@@ -45,10 +55,14 @@ $page = min($page, $maxpage);
 
 $start = ($page - 1) * 5;
 // p.*とはpostsの全ての値を指す
-$posts = $db->prepare('SELECT m.name, m.picture, p.* FROM members m, posts p WHERE m.id=p.member_id ORDER BY p.created DESC LIMIT ?, 5');
+$posts = $db->prepare('SELECT m.name, m.picture, p.* FROM members m,
+(SELECT posts.*, li_cnt FROM posts LEFT JOIN 
+                                   (SELECT liked_post_id, COUNT(liked_post_id) AS li_cnt FROM likes GROUP BY liked_post_id) AS li ON posts.id=li.liked_post_id) p
+WHERE m.id=p.member_id ORDER BY p.created DESC LIMIT ?, 5');
 $posts->bindParam(1, $start, PDO::PARAM_INT);
 $posts->execute();
 
+// Reボタンが押されたら
 if (isset($_REQUEST['res'])) {
   // 返信の処理
   $response = $db->prepare('SELECT m.name, m.picture, p.* FROM members m, posts p WHERE m.id=p.member_id AND p.id=?');
@@ -57,6 +71,16 @@ if (isset($_REQUEST['res'])) {
   $table = $response->fetch();
   $message = '@' . $table['name'] . ' ' . $table['message'];
 }
+
+$pressedMessages = $db->prepare('SELECT liked_post_id FROM likes WHERE pressed_member_id=?');
+$pressedMessages->bindParam(1, $_SESSION['id'], PDO::PARAM_INT);
+$pressedMessages->execute();
+$pressedMsg = array();
+foreach ($pressedMessages as $pMsg) {
+  $pressedMsg[] = $pMsg;
+}
+
+
 
 ?>
 <!DOCTYPE html>
@@ -83,6 +107,8 @@ if (isset($_REQUEST['res'])) {
           <dt><?php print(htmlspecialchars($member['name'], ENT_QUOTES)); ?>さん、メッセージをどうぞ</dt>
           <dd>
             <textarea name="message" cols="50" rows="5"><?php print(htmlspecialchars($message, ENT_QUOTES)); ?></textarea>
+
+            <!-- 返信先が誰であるか -->
             <input type="hidden" name="reply_post_id" value="<?php print(htmlspecialchars($_REQUEST['res'], ENT_QUOTES)); ?>" />
           </dd>
         </dl>
@@ -98,10 +124,29 @@ if (isset($_REQUEST['res'])) {
           <img src="member_picture/<?php print(htmlspecialchars($post['picture'], ENT_QUOTES)); ?>" width="48" height="48" alt="<?php print(htmlspecialchars($post['name'], ENT_QUOTES)); ?>" />
           <p><?php print(htmlspecialchars($post['message'], ENT_QUOTES)); ?><span class="name">（<?php print(htmlspecialchars($post['name'], ENT_QUOTES)); ?>）</span>[<a href="index.php?res=<?php print(htmlspecialchars($post['id'], ENT_QUOTES)); ?>">Re</a>]</p>
           <p class="day"><a href="view.php?id=<?php print(htmlspecialchars($post['id'], ENT_QUOTES)); ?>"><?php print(htmlspecialchars($post['created'], ENT_QUOTES)); ?></a>
+
             <?php if ($post['reply_message_id'] > 0) : ?>
               <a href="view.php?id=<?php print(htmlspecialchars($post['reply_message_id'], ENT_QUOTES)); ?>">
                 返信元のメッセージ</a>
             <?php endif; ?>
+
+
+            <!-- いいね機能 -->
+            <?php
+            $likeAri = 0;
+            for ($i = 0; $i < count($pressedMsg); $i++) {
+              if ($pressedMsg[$i]['liked_post_id'] == $post['id']) {
+                $likeAri = $post['id'];
+                break;
+              }
+            }
+            ?>
+            <?php if ($likeAri > 0) { ?>
+              <a class="like" style="color:#F33;"  href=" like_delete.php?id=<?php echo ($post['id']); ?>">&#9829;</a><span class="likeCount"><?php echo ($post['li_cnt']); ?></span>
+            <?php } else { ?>
+              <a class="like" href="like_insert.php?id=<?php echo ($post['id']); ?>">&#9825;</a><span class="likeCount"><?php echo ($post['li_cnt']); ?></span>
+            <?php } ?>
+
             <?php if ($_SESSION['id'] == $post['member_id']) : ?>
               [<a href="delete.php?id=<?php print(htmlspecialchars($post['id'], ENT_QUOTES)); ?>" style="color: #F33;">削除</a>]
             <?php endif; ?>

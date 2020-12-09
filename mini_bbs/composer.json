@@ -1,0 +1,62 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "http://example.com/example.json",
+    "type": "object",
+    "title": "The root schema",
+    "description": "The root schema comprises the entire JSON document.",
+    "default": {},
+    "examples": [
+        {
+            "require": {
+                "php": "~7.4.1",
+                "ext-mbstring": "*"
+            }
+        }
+    ],
+    "required": [
+        "require"
+    ],
+    "properties": {
+        "require": {
+            "$id": "#/properties/require",
+            "type": "object",
+            "title": "The require schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": {},
+            "examples": [
+                {
+                    "php": "~7.4.1",
+                    "ext-mbstring": "*"
+                }
+            ],
+            "required": [
+                "php",
+                "ext-mbstring"
+            ],
+            "properties": {
+                "php": {
+                    "$id": "#/properties/require/properties/php",
+                    "type": "string",
+                    "title": "The php schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": "",
+                    "examples": [
+                        "~7.4.1"
+                    ]
+                },
+                "ext-mbstring": {
+                    "$id": "#/properties/require/properties/ext-mbstring",
+                    "type": "string",
+                    "title": "The ext-mbstring schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": "",
+                    "examples": [
+                        "*"
+                    ]
+                }
+            },
+            "additionalProperties": true
+        }
+    },
+    "additionalProperties": true
+}

@@ -2,31 +2,39 @@
 session_start();
 require('dbconnect.php');
 
+// ページを開いたときに保存されている内容を反映する
 if($_COOKIE['email'] !== ''){
   $email = $_COOKIE['email'];
 }
+// ログインボタンを押すと
 if(!empty($_POST)){
   $email = $_POST['email'];
+  // メールとパスワードが記述している
   if($_POST['email'] !== '' && $_POST['password'] !== ''){
+    // 記述した内容とデータベースの内容が合っているかチェック
     $login = $db->prepare('SELECT * FROM members WHERE email=? AND password=?');
     $login->execute(array(
       $_POST['email'],
       sha1($_POST['password'])
     ));
     $member = $login->fetch();
-
+    // 記述した内容とデータベースの内容が一致したならばセッションに保存し投稿画面に移動する
     if($member){
       $_SESSION['id'] = $member['id'];
       $_SESSION['time'] = time();
 
+      // ブラウザを閉じた後も保存しておきたいので、クッキーに保存する
       if($_POST['save'] === 'on'){
         setcookie('email', $_POST['email'], time()+60*60*24*14);
       }
       header('Location: index.php');
       exit();
+
+      // 記述した内容とデータベースに内容が不一致ならば
     }else{
       $error['login'] = 'failed';
     }
+    // メールとパスワードが空白ならば
   }else{
     $error['login'] = 'blank';
   }

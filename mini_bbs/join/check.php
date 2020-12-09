@@ -2,10 +2,12 @@
 session_start();
 require('../dbconnect.php');
 
+// セッションに内容が入っているか
 if (!isset($_SESSION['join'])) {
 	header('Location:index.php');
 	exit();
 }
+// データベースに保存する
 if(!empty($_POST)){
 	$statment = $db->prepare('INSERT INTO members SET name=?, email=?, password=?, picture=?, created=Now()');
 	echo $statment->execute(array(
@@ -14,6 +16,7 @@ if(!empty($_POST)){
 		sha1($_SESSION['join']['password']),
 		$_SESSION['join']['image']
 	));
+	// セッションの内容を消す。消さないとDBに重複するかも
 	unset($_SESSION['join']);
 	header('Location: thanks.php');
 	exit();
